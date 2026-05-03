@@ -18,22 +18,17 @@
 | `cmd-12` | `wget`              | Access (or download) a web file                    | [[Chapter 6: Certificate Management]](./ch06-certificates.md) |
 | `cmd-13` | `acme.sh`           | Commands related to acme.sh certificate management | [[Chapter 6: Certificate Management]](./ch06-certificates.md) |
 | `cmd-14` | `rm`                | Remove (delete) command                            |       [[Chapter 7: Xray Server]](./ch07-xray-server.md)       |
-| `cmd-15` | `crontab -e`        | Edit current user's scheduled tasks                |       [[Chapter 7: Xray Server]](./ch07-xray-server.md)       |
-| `cmd-16` | `touch`             | Create an empty file                               |       [[Chapter 7: Xray Server]](./ch07-xray-server.md)       |
-| `cmd-17` | `systemctl`         | Basic `systemd` service management command         |       [[Chapter 7: Xray Server]](./ch07-xray-server.md)       |
-| `cmd-18` | `reboot`            | Reboot the Linux system                            |       [[Chapter 7: Xray Server]](./ch07-xray-server.md)       |
+| `cmd-15` | `touch`             | Create an empty file                               |       [[Chapter 7: Xray Server]](./ch07-xray-server.md)       |
+| `cmd-16` | `systemctl`         | Basic `systemd` service management command         |       [[Chapter 7: Xray Server]](./ch07-xray-server.md)       |
+| `cmd-17` | `reboot`            | Reboot the Linux system                            |       [[Chapter 7: Xray Server]](./ch07-xray-server.md)       |
 
 ## 2. Index of Important Linux Configuration Files for Beginners
 
-|    ID     | Config File Location                    | File Description                          |                  Featured Chapter                  |
-| :-------: | :-------------------------------------- | :---------------------------------------- | :------------------------------------------------: |
-| `conf-01` | `/etc/ssh/sshd_config`                  | SSH remote login program settings         |     [[Chapter 3: Remote Login]](./ch03-ssh.md)     |
-| `conf-02` | `/etc/nginx/nginx.conf`                 | Nginx program settings                    | [[Chapter 5: Website Building]](./ch05-webpage.md) |
-| `conf-03` | `/etc/apt/sources.list`                 | apt software source list                  | [[Chapter 7: Xray Server]](./ch07-xray-server.md)  |
-| `conf-04` | `/etc/apt/sources.list.d/vpsadmin.list` | User-defined software source list         | [[Chapter 7: Xray Server]](./ch07-xray-server.md)  |
-| `conf-05` | `crontab -e`                            | Current user's scheduled tasks            | [[Chapter 7: Xray Server]](./ch07-xray-server.md)  |
-| `conf-06` | `/etc/sysctl.conf`                      | Manual kernel parameter settings          | [[Chapter 7: Xray Server]](./ch07-xray-server.md)  |
-| `conf-07` | `/etc/sysctl.d/vpsadmin.conf`           | User-defined kernel parameter config file | [[Chapter 7: Xray Server]](./ch07-xray-server.md)  |
+|    ID     | Config File Location        | File Description                    |                  Featured Chapter                  |
+| :-------: | :-------------------------- | :---------------------------------- | :------------------------------------------------: |
+| `conf-01` | `/etc/ssh/sshd_config`      | SSH remote login program settings   |     [[Chapter 3: Remote Login]](./ch03-ssh.md)     |
+| `conf-02` | `/etc/nginx/nginx.conf`     | Nginx program settings              | [[Chapter 5: Website Building]](./ch05-webpage.md) |
+| `conf-03` | `/etc/sysctl.d/99-bbr.conf` | Custom kernel parameter config file | [[Chapter 7: Xray Server]](./ch07-xray-server.md)  |
 
 ## 3. Index of Important Xray Files for Beginners
 

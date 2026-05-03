@@ -107,7 +107,7 @@
     1. 小小白白 Linux 基础命令：
        | 编号 | 命令名称 | 命令说明 |
        |:--:|:--:|:--:|
-       | `cmd-16` | `touch` | 建立空白文件 |
+       | `cmd-15` | `touch` | 建立空白文件 |
 
     2. 在`vpsadmin`的文件夹内建立一个【日志专用文件夹】
 
@@ -318,15 +318,12 @@ sudo systemctl enable xray
 
 一句话：**不是！不要用这些！这些都为了吸引眼球乱起的名字！**
 
-`BBR` 的更新和发布，都是跟随 Linux 的内核（`Kernel`）进行的。换言之，只要你用的是比较新的内核，就自然会使用到新版`BBR`。
+BBR 是内核自带跟随内核发布并更新的，而这些名字看起来很酷炫的东西，说白了就是作者自行调整 `BBR` 参数以及使用这些参数构建出的内核，这些脚本也仅仅就是下载安装这些魔改内核。
 
-而这些名字看起来很酷炫的东西，说白了就是仍未正式发布的、尚在测试阶段的内核及其对应的`BBR`版本。这些脚本也仅仅就是通过下载预览版的内核（甚至第三方魔改内核）来率先开启而已。
-
-内核的稳定是一台服务器稳定运行的基石。**【BBR 测试版带来的细微性能差异绝对不值得更换不稳定的内核。】** 请选择你所在的 Linux 发行版所支持的最新内核，这样可以最大限度的保持服务器的长期稳定和兼容。
+内核的稳定是一台服务器稳定运行的基石。**【BBR 魔改版带来的细微性能差异绝对不值得更换不稳定的内核。】** 请选择你所在的 Linux 发行版所支持的最新内核，这样可以最大限度的保持服务器的长期稳定和兼容。
 
 ::: warning
-所谓魔改`bbr`的【领先】是有非常强的时效性的。比如很多 `bbrplus` 脚本，因为几年来都没有更新，到现在还会把你的内核换成 `4.19`，要知道现在稳定如 Debian 已经是 `5.9`
-的时代了，那么这个脚本放在 2018 年 1 月也许领先了一点，到 2018 年 10 月 4.19 正发布时就已经失去了意义，放在现在甚至可以说是完完全全的【降级】和【劣化】
+所谓魔改`bbr`的【领先】是有非常强的时效性的。比如很多 `bbrplus` 脚本，因为几年来都没有更新，到现在还会把你的内核换成很老的版本，导致你的系统失去安全性甚至无法启动。
 :::
 
 4. `fq`, `fq_codel`, `fq_pie`, `cake`和其他算法哪个好？
@@ -346,101 +343,53 @@ sudo systemctl enable xray
 如果你的线路真的丢包率奇高，真正靠谱的解决方案是【换线路】。
 :::
 
-6. 啰嗦了这么多，就是因为围绕 `BBR` 忽悠小白的错误概念和坑人脚本实在是太多了。我希望你们现在对 `BBR` 有了相对清晰的理解。接下来，我们就动手安装最新的 Debian 内核并开启`BBR` 吧！（真的很简单）
+6. 啰嗦了这么多，就是因为围绕 `BBR` 忽悠小白的错误概念和坑人脚本实在是太多了。我希望你们现在对 `BBR` 有了相对清晰的理解。接下来，我们就动手开启`BBR` 吧！
 
-7. 给 Debian 10 添加官方 `backports` 源，获取更新的软件库
-
-```shell
-sudo nano /etc/apt/sources.list
-```
-
-::: warning 说明
-本文以 Debian 10 为例，所以使用 `/etc/apt/sources.list` 仍无问题，但如果你并不是根据本文从头开始，或者使用了其他 Linux
-发行版，那么建议你建立 `/etc/apt/sources.list.d/` 文件夹，并在这个文件夹内建立自己的配置文件，形如 `/etc/apt/sources.list.d/vpsadmin.list`
-，以此保证兼容性，也可避免默认文件在不可预见的情况下被覆盖而导致配置丢失。
-:::
-
-8.  然后把下面这一条加在最后，并保存退出。
-
-```
-deb http://archive.debian.org/debian buster-backports main
-```
-
-9.  刷新软件库并查询 Debian 官方的最新版内核并安装。请务必安装你的 VPS 对应的版本（本文以比较常见的【amd64】为例）。
+7. 添加参数配置文件并指定开启 `BBR`
 
 ```shell
-sudo apt update && sudo apt -t buster-backports install linux-image-amd64
+sudo nano /etc/sysctl.d/99-bbr.conf
 ```
 
-::: warning 注意
-
-如果你的 VPS 支持，可以尝试【云服务器专用内核】`linux-image-cloud-amd64`，优点就是精简、资源占用低，缺点嘛是有同学反馈不支持的系统强行安装会导致无法开机（Kernel 无法识别）。
-
-为了避免无法识别的悲剧，请确保：
-
-- 尝试前做一个系统快照，或者
-- 你有 `vnc` 可以救场（并且你知道怎么用）
-
-:::
-
-10. 修改 `kernel` 参数配置文件 `sysctl.conf` 并指定开启 `BBR`
-
-```shell
-sudo nano /etc/sysctl.conf
-```
-
-::: warning 说明
-本文以 Debian 10 为例，所以使用 `/etc/sysctl.conf` 仍无问题，但如果你并不是跟着本文从头开始，或者使用了其他 Linux 发行版，那么建议你建立 `/etc/sysctl.d/`
-文件夹，并在这个文件夹内建立自己的配置文件，形如 `/etc/sysctl.d/vpsadmin.conf`，以此保证兼容性，因为部分发行版在 `systemd`
-207 版本之后便不再从 `/etc/sysctl.conf` 读取参数。使用自定义配置文件也可避免默认文件在不可预见的情况下被覆盖而导致配置丢失。
-:::
-
-11. 把下面的内容添加进去
+8. 把下面的内容添加进去
 
 ```
 net.core.default_qdisc=fq
 net.ipv4.tcp_congestion_control=bbr
 ```
 
-12. 重启 VPS、使内核更新和`BBR`设置都生效
+9. 读取配置，使 `BBR` 设置生效
 
 ```shell
-sudo reboot
+sudo sysctl --system
 ```
 
-13. 完整流程演示如下：
-
-::: tip 啰嗦君
-因为我做展示的 VPS 支持云服务器专用内核，所以动图中我用了 `linux-image-cloud-amd64`
-。如果你不确定你的 VPS 是否支持，那请务必按照第 3 步的命令，使用常规内核 `linux-image-amd64`。
-:::
-
-![更新Debian内核并开启`BBR`](./ch07-img06-bbr-proper.gif)
-
-14. 确认`BBR`开启
+10. 确认`BBR`开启
 
 如果你想确认 `BBR` 是否正确开启，可以使用下面的命令：
 
 ```shell
-lsmod | grep bbr
+sysctl net.ipv4.tcp_congestion_control
 ```
 
 此时应该返回这样的结果：
 
 ```
-tcp_bbr
+net.ipv4.tcp_congestion_control = bbr
 ```
+
+如果你在疑惑这个 `ipv4`，无需在意，只是历史命名遗留，实际上对 `ipv6` 也是生效的。
 
 如果你想确认 `fq` 算法是否正确开启，可以使用下面的命令：
 
 ```shell
-lsmod | grep fq
+sysctl net.core.default_qdisc
 ```
 
 此时应该返回这样的结果：
 
 ```
-sch_fq
+net.core.default_qdisc = fq
 ```
 
 ## 7.8 服务器优化之二：开启 HTTP 自动跳转 HTTPS
