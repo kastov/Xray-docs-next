@@ -3,7 +3,7 @@
 Freedom is an outbound protocol used to send (normal) TCP or UDP data to any network.
 
 ::: warning
-This outbound's safety policy may block some targets by default. See `finalRules` below for details.
+This outbound has a default safety policy in server-side and reverse-proxy scenarios, which may block some targets. See `finalRules` below for how to allow them.
 :::
 
 ## OutboundConfigurationObject
@@ -108,13 +108,19 @@ The value of `proxyProtocol` is the PROXY protocol version number. Options are `
 
 Matches Freedom final outbound rules in order, and allows or blocks connection targets.
 
-Compared with blocking in `routing`, `finalRules` applies at Freedom's final outbound stage: TCP is matched after the final IP is resolved and before dialing, and UDP is matched packet by packet on both send and receive, making it stricter and more thorough. Each rule match takes about 50-150 ns.
+Compared with blocking in `routing`, `finalRules` applies at Freedom's final outbound stage: matching happens after the final IP is resolved and before dialing; in addition, UDP is also matched packet by packet during send and receive, making it stricter and more thorough. Each rule match takes about 50-150 ns.
 
-If no rule is matched, the built-in fallback rule is used: traffic from the VLESS reverse proxy blocks all targets by default; traffic from `VLESS`, `VMess`, `Trojan`, `Shadowsocks`, `Hysteria`, or `WireGuard` inbounds blocks private and reserved IP ranges by default; other traffic is allowed by default.
+Note: whenever Freedom needs to apply `finalRules`, if `domainStrategy` is `AsIs` and the target is a domain, Freedom still resolves the target to an IP through the operating system DNS before matching rules. At that point the target is no longer a domain, so the later `sockopt.domainStrategy` and its `happyEyeballs` no longer take effect.
 
-For the seven inbound types above, or when `finalRules` is explicitly configured: if Freedom `domainStrategy` is `AsIs` and the target is a domain, Freedom resolves the target to an IP before applying `finalRules`. At that point the target is no longer a domain, so the later `sockopt.domainStrategy` and its `happyEyeballs` no longer take effect.
+::: warning
+There is a default fallback safety policy for server-side and reverse-proxy scenarios:
 
-To restore the previous behavior, configure exactly one `allow` rule in `finalRules` without any matching conditions.
+If no explicit rule matches, the built-in fallback rule is used: traffic from the VLESS reverse proxy blocks all targets by default; traffic from `VLESS`, `VMess`, `Trojan`, `Shadowsocks`, `Hysteria`, or `WireGuard` inbounds blocks private and reserved IP ranges by default; other traffic is fully allowed by default.
+
+If the server needs to allow clients to access some internal services, explicitly configure `allow` rules and limit them to the necessary `network`, `ip`, and `port` whenever possible.
+
+If the server also needs features that rely on passing the domain to `sockopt` (such as `sockopt.domainStrategy` or `happyEyeballs`), it cannot continue relying on this default safety policy. You can configure the first rule as an `allow` rule without any matching conditions to restore the previous behavior; this is also equivalent to disabling this default safety policy, so evaluate the security impact yourself.
+:::
 
 ### FinalRuleObject
 
@@ -123,7 +129,8 @@ To restore the previous behavior, configure exactly one `allow` rule in `finalRu
   "action": "block",
   "network": "tcp,udp",
   "port": "53,443",
-  "ip": ["10.0.0.0/8", "2001:db8::/32"]
+  "ip": ["10.0.0.0/8", "2001:db8::/32"],
+  "blockDelay": "30-90"
 }
 ```
 
@@ -147,3 +154,9 @@ Target port range. The syntax is the same as [`port` in routing rules](../routin
 > `ip`: \[string\]
 
 An array where each item represents an IP range. The rule takes effect when an item matches the target IP. The syntax is the same as [`ip` in routing rules](../routing.md#ruleobject). If omitted, all IPs are matched.
+
+> `blockDelay`: string
+
+Sets how long the blackhole state lasts after a blocking rule matches.
+
+When a rule's `action` is `block` and the target matches, Freedom puts the connection into a blackhole state and closes it after this duration expires. The unit is seconds. It can be written as a fixed value or a range, for example `30` or `30-90`. If omitted, it defaults to `30-90`, which means a random value within that range.
